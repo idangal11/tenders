@@ -1,0 +1,15 @@
+name: Validate data
+
+on:
+  push:
+    branches: [main]
+    paths: ["site/data/**"]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python3 -c "import json;t=json.load(open('site/data/tenders.json'));m=json.load(open('site/data/meta.json'));assert isinstance(t,list) and all('id' in x and 'title' in x for x in t);print(len(t),'tenders, last scan',m.get('at'))"
