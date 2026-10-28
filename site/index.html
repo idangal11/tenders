@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>רדאר מכרזים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: a morning briefing on top, then a sortable stack of tender files, each like a stamped government docket. */
+:root{
+  --bg:#f3f5f6; --surface:#ffffff; --sunken:#e9eef0; --line:#d5dde1;
+  --fg:#14232b; --muted:#5a6b74; --faint:#8696a0;
+  --ink:#0d4d5e; --ink-soft:#d6e8ec; --ink-fg:#ffffff;
+  --good:#1d7a4a; --good-bg:#dff2e7;
+  --warn:#9a5b00; --warn-bg:#fbebcd;
+  --bad:#b23a32; --bad-bg:#f8dedb;
+  --gold:#b58a1e;
+  --f-display:"Frank Ruhl Libre","David Libre",Georgia,serif;
+  --f-body:"IBM Plex Sans Hebrew","Rubik","Segoe UI",Arial,sans-serif;
+  --f-data:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1619; --surface:#152126; --sunken:#1b2a30; --line:#28393f;
+  --fg:#e6eef1; --muted:#9db0b8; --faint:#6f838c;
+  --ink:#5fb6c9; --ink-soft:#1c3c45; --ink-fg:#08191e;
+  --good:#5cc78f; --good-bg:#16342a; --warn:#f0b454; --warn-bg:#3a2c12; --bad:#f08178; --bad-bg:#3f1f1d; --gold:#e0b84f;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1619; --surface:#152126; --sunken:#1b2a30; --line:#28393f;
+  --fg:#e6eef1; --muted:#9db0b8; --faint:#6f838c;
+  --ink:#5fb6c9; --ink-soft:#1c3c45; --ink-fg:#08191e;
+  --good:#5cc78f; --good-bg:#16342a; --warn:#f0b454; --warn-bg:#3a2c12; --bad:#f08178; --bad-bg:#3f1f1d; --gold:#e0b84f;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55;direction:rtl}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+a{color:var(--ink)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.num{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:2px solid var(--fg);padding-bottom:16px}
+.brand{display:flex;flex-direction:column;gap:4px}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:600}
+h1{font-size:clamp(30px,5vw,44px);font-weight:900}
+.scanline{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted)}
+.scanline b{color:var(--fg);font-weight:600}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--good);margin-inline-end:6px;vertical-align:middle}
+.dot.off{background:var(--faint)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.stat .v{font-family:var(--f-data);font-size:30px;font-weight:600;line-height:1.1}
+.stat .l{font-size:13px;color:var(--muted)}
+.stat.hot .v{color:var(--ink)}
+.stat.warn .v{color:var(--warn)}
+@media (max-width:720px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* briefing */
+.brief{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.brief{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.panel h2{font-size:22px}
+.brief-text{white-space:pre-line;max-width:70ch}
+.picks{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.picks li{display:flex;gap:10px;align-items:baseline}
+.picks .sc{font-family:var(--f-data);font-weight:600;color:var(--ink);min-width:2.4em}
+.picks a{text-decoration:none;color:var(--fg)}
+.picks a:hover{text-decoration:underline}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--ink-fg)}
+.chip .c{font-family:var(--f-data);opacity:.75;margin-inline-start:4px}
+.controls .grow{flex:1 1 180px;min-width:0}
+#q{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 10px}
+select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px}
+label.tog{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer}
+
+/* tender docket */
+.list{display:flex;flex-direction:column;gap:14px}
+.t{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);display:grid;grid-template-columns:96px minmax(0,1fr);overflow:hidden}
+.t.closed{opacity:.72}
+.t.skip{opacity:.5}
+.score{background:var(--sunken);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px 6px;border-inline-end:1px solid var(--line)}
+.ring{--p:50;width:64px;height:64px;border-radius:50%;background:conic-gradient(var(--sc) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center}
+.ring span{width:50px;height:50px;border-radius:50%;background:var(--sunken);display:grid;place-items:center;font-family:var(--f-data);font-weight:600;font-size:19px}
+.fit{font-size:12px;font-weight:600;color:var(--sc)}
+.body{padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:600;background:var(--sunken);color:var(--muted)}
+.pill.new{background:var(--ink);color:var(--ink-fg)}
+.pill.cat{background:var(--ink-soft);color:var(--ink)}
+.pill.d-ok{background:var(--good-bg);color:var(--good)}
+.pill.d-soon{background:var(--warn-bg);color:var(--warn)}
+.pill.d-urgent,.pill.d-closed{background:var(--bad-bg);color:var(--bad)}
+.t h3{font-size:20px;font-weight:700}
+.t h3 a{color:var(--fg);text-decoration:none}
+.t h3 a:hover{text-decoration:underline}
+.pub{font-size:14px;color:var(--muted)}
+.summary{max-width:80ch}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
+.box{border-top:2px solid var(--line);padding-top:6px;font-size:14px;min-width:0}
+.box .h{font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:2px}
+.box.why .h{color:var(--good)} .box.why{border-color:var(--good)}
+.box.risk .h{color:var(--bad)} .box.risk{border-color:var(--bad)}
+.box.next .h{color:var(--ink)} .box.next{border-color:var(--ink)}
+.foot{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding-top:10px}
+.facts{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted)}
+.facts b{color:var(--fg);font-weight:600}
+.marks{display:flex;gap:6px;flex-wrap:wrap}
+.mk{border:1px solid var(--line);background:transparent;border-radius:6px;padding:4px 10px;font-size:13px;cursor:pointer}
+.mk[aria-pressed="true"].m-interest{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+.mk[aria-pressed="true"].m-bid{background:var(--ink);border-color:var(--ink);color:var(--ink-fg)}
+.mk[aria-pressed="true"].m-skip{background:var(--sunken);color:var(--muted)}
+@media (max-width:560px){.t{grid-template-columns:minmax(0,1fr)}.score{flex-direction:row;justify-content:flex-start;gap:12px;border-inline-end:0;border-bottom:1px solid var(--line);padding:10px 16px}.ring{width:48px;height:48px}.ring span{width:38px;height:38px;font-size:15px}}
+
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:28px;text-align:center;color:var(--muted)}
+
+/* sources + playbook */
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.two{grid-template-columns:minmax(0,1fr)}}
+.src{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.src li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.src li:last-child{border-bottom:0}
+.src .st{font-size:12px;white-space:nowrap}
+.st.ok{color:var(--good)} .st.err{color:var(--bad)} .st.na{color:var(--faint)}
+.steps{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.steps b{font-weight:600}
+.note{font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.t{transition:opacity .2s}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">מכרזים · קולות קוראים · מאגרי ספקים</span>
+      <h1>רדאר מכרזים</h1>
+      <span class="pub">הטמעת AI, פיתוח, הרצאות וסדנאות לעסק חדש</span>
+    </div>
+    <div class="scanline">
+      <span><span class="dot off" id="live-dot"></span><span id="live-txt">טוען נתונים…</span></span>
+      <span>סריקה אחרונה: <b id="last-scan">—</b></span>
+      <span>הסריקה הבאה: <b id="next-scan">—</b></span>
+    </div>
+  </header>
+
+  <section class="stats" aria-label="מספרים עיקריים">
+    <div class="stat hot"><span class="v" id="s-open">—</span><span class="l">מכרזים פתוחים רלוונטיים</span></div>
+    <div class="stat"><span class="v" id="s-high">—</span><span class="l">התאמה גבוהה (70+)</span></div>
+    <div class="stat warn"><span class="v" id="s-soon">—</span><span class="l">נסגרים תוך 7 ימים</span></div>
+    <div class="stat"><span class="v" id="s-new">—</span><span class="l">חדשים בסריקה האחרונה</span></div>
+  </section>
+
+  <section class="brief">
+    <div class="panel">
+      <span class="eyebrow" id="brief-date">תדריך בוקר</span>
+      <h2>מה כדאי לעשות היום</h2>
+      <div class="brief-text" id="brief">התדריך יופיע כאן אחרי הסריקה הראשונה.</div>
+    </div>
+    <div class="panel">
+      <span class="eyebrow">ההמלצות המובילות</span>
+      <h2>לפי ציון התאמה</h2>
+      <ol class="picks" id="picks"><li class="note">אין עדיין נתונים.</li></ol>
+    </div>
+  </section>
+
+  <section aria-label="רשימת מכרזים" style="display:flex;flex-direction:column;gap:12px">
+    <div class="controls">
+      <div class="chips" id="cats" role="group" aria-label="סינון לפי תחום"></div>
+      <div class="grow"><input id="q" type="search" placeholder="חיפוש לפי מילה, משרד או מספר מכרז" aria-label="חיפוש"></div>
+      <select id="sort" aria-label="מיון">
+        <option value="score">מיון: התאמה</option>
+        <option value="deadline">מיון: מועד הגשה</option>
+        <option value="new">מיון: נמצא לאחרונה</option>
+      </select>
+      <label class="tog"><input type="checkbox" id="open-only" checked> פתוחים בלבד</label>
+      <label class="tog"><input type="checkbox" id="hide-skip" checked> הסתר "לא רלוונטי"</label>
+    </div>
+    <div class="list" id="list"><div class="empty">טוען מכרזים…</div></div>
+  </section>
+
+  <section class="two">
+    <div class="panel">
+      <span class="eyebrow">מה נסרק כל בוקר</span>
+      <h2>מקורות</h2>
+      <ul class="src" id="sources"><li class="note">רשימת המקורות תופיע אחרי הסריקה.</li></ul>
+    </div>
+    <div class="panel">
+      <span class="eyebrow">כדי לזכות כספק חדש</span>
+      <h2>צעדים שפותחים דלתות</h2>
+      <ol class="steps">
+        <li><b>רישום במערכת "יהלום" (quickbid.gpa.gov.il)</b> וכתובת מייל קבועה למכרזים. כמעט כל מכרזי הממשלה מוגשים שם.</li>
+        <li><b>שתי עבודות ראשונות עם ממליצים.</b> גם פיילוט קטן או סדנה בהתנדבות לעמותה, רשות או בית ספר נחשבים לניסיון. מכרזים קטנים דורשים לרוב 2 פרויקטים בשנתיים האחרונות.</li>
+        <li><b>אישורים בסיסיים:</b> אישור ניהול ספרים וניכוי מס במקור, תצהיר עובדים זרים ושכר מינימום, ותעודת עוסק. בלעדיהם ההצעה נפסלת.</li>
+        <li><b>מאגרי ספקים של רשויות מקומיות ומוסדות.</b> מאגר מרצים ומנחי סדנאות נפתח כמה פעמים בשנה, עם תנאי סף נמוכים.</li>
+        <li><b>גפן (משרד החינוך):</b> תוכנית נכנסת לקטלוג דרך "מאגר ספקי תכניות ומענים". הסבב האחרון נסגר ב-3.2.2026. כדאי להכין תוכנית סדנאות AI לתלמידים או למורים עכשיו, לסבב הבא.</li>
+        <li><b>שותפות במכרזים גדולים:</b> כשתנאי הסף גבוהים (5 פרויקטים, ארגונים של 200+ עובדים), אפשר להצטרף כמדריך או כקבלן משנה של חברה שעומדת בהם.</li>
+      </ol>
+    </div>
+  </section>
+  <p class="note" id="foot-note">הציון (0–100) משקלל התאמה לתחום (40), עמידה ריאלית בתנאי הסף לעסק בתחילת דרכו (30), זמן שנשאר להגשה (15) והיקף כספי (15). כל מכרז מקושר למקור הרשמי. לפני הגשה יש לקרוא את חוברת המכרז המלאה.</p>
+</div>
+
+<script>
+(function(){
+  var CATS={ai:"AI ופיתוח",data:"דאטה וניתוח",training:"הרצאות והדרכות",education:"חינוך וגפן",funding:"מענקים ותמיכות",registry:"מאגרי ספקים"};
+  var state={tenders:[],marks:{},meta:null,cat:"all",q:"",sort:"score",openOnly:true,hideSkip:true};
+  var db=true;
+  var $=function(id){return document.getElementById(id)};
+  function store(k,v){try{localStorage.setItem("tr-"+k,JSON.stringify(v))}catch(e){}}
+  function load(k,d){try{var v=localStorage.getItem("tr-"+k);return v==null?d:JSON.parse(v)}catch(e){return d}}
+  state.sort=load("sort","score");state.marks=load("marks",{});state.openOnly=load("open",true);state.hideSkip=load("hideSkip",true);
+  $("sort").value=state.sort;$("open-only").checked=state.openOnly;$("hide-skip").checked=state.hideSkip;
+
+  var fmtDate=function(iso,withTime){if(!iso)return "—";var d=new Date(iso);if(isNaN(d))return iso;
+    var o={timeZone:"Asia/Jerusalem",day:"numeric",month:"numeric",year:"numeric"};if(withTime){o.hour="2-digit";o.minute="2-digit"}
+    return d.toLocaleString("he-IL",o)};
+  function daysLeft(iso){if(!iso)return null;var d=new Date(iso);if(isNaN(d))return null;return (d-new Date())/864e5}
+  function isOpen(t){if(t.status==="closed")return false;var dl=daysLeft(t.deadline);return dl==null?t.status!=="closed":dl>=0}
+  function dlPill(t){
+    var dl=daysLeft(t.deadline);
+    if(t.status==="closed"||(dl!=null&&dl<0))return '<span class="pill d-closed">סגור · '+esc(fmtDate(t.deadline))+'</span>';
+    if(dl==null)return '<span class="pill">'+esc(t.deadlineText||"מועד לא ידוע")+'</span>';
+    var n=Math.floor(dl),txt=n<1?"נסגר היום/מחר":"עוד "+n+" ימים";
+    var cls=dl<3?"d-urgent":dl<8?"d-soon":"d-ok";
+    return '<span class="pill '+cls+'">'+txt+' · '+esc(fmtDate(t.deadline,true))+'</span>';
+  }
+  function scoreColor(s){return s>=70?"var(--good)":s>=45?"var(--gold)":"var(--faint)"}
+  function fitLabel(s){return s>=70?"התאמה גבוהה":s>=45?"התאמה בינונית":"התאמה נמוכה"}
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function safeUrl(u){return /^https:\/\//.test(u||"")?u:"#"}
+
+  function visible(){
+    var q=state.q.trim().toLowerCase();
+    return state.tenders.filter(function(t){
+      if(state.cat!=="all"&&t.category!==state.cat)return false;
+      if(state.openOnly&&!isOpen(t))return false;
+      var m=state.marks[t._id];if(state.hideSkip&&m&&m.mark==="skip")return false;
+      if(q){var hay=[t.title,t.publisher,t.number,t.summary,t.source].join(" ").toLowerCase();if(hay.indexOf(q)<0)return false}
+      return true;
+    }).sort(function(a,b){
+      if(state.sort==="deadline"){var da=a.deadline?new Date(a.deadline):Infinity,dbb=b.deadline?new Date(b.deadline):Infinity;return da-dbb}
+      if(state.sort==="new")return String(b.firstSeen||"").localeCompare(String(a.firstSeen||""));
+      return (b.score||0)-(a.score||0);
+    });
+  }
+
+  function renderCats(){
+    var counts={all:0};state.tenders.forEach(function(t){if(state.openOnly&&!isOpen(t))return;counts.all++;counts[t.category]=(counts[t.category]||0)+1});
+    var keys=["all"].concat(Object.keys(CATS));
+    $("cats").innerHTML=keys.map(function(k){
+      return '<button class="chip" data-cat="'+k+'" aria-pressed="'+(state.cat===k)+'">'+(k==="all"?"הכול":CATS[k])+'<span class="c">'+(counts[k]||0)+'</span></button>'}).join("");
+  }
+
+  function card(t){
+    var s=Math.max(0,Math.min(100,t.score||0)),m=(state.marks[t._id]||{}).mark||"";
+    var open=isOpen(t);
+    var newPill=(state.meta&&t.firstSeen&&state.meta.at&&t.firstSeen>=String(state.meta.at).slice(0,10))?'<span class="pill new">חדש</span>':'';
+    var facts=[];
+    if(t.number)facts.push('מס׳ <b class="num">'+esc(t.number)+'</b>');
+    if(t.type)facts.push(esc(t.type));
+    if(t.budget)facts.push('היקף: <b>'+esc(t.budget)+'</b>');
+    if(t.source)facts.push('מקור: '+esc(t.source));
+    return '<article class="t'+(open?"":" closed")+(m==="skip"?" skip":"")+'" style="--sc:'+scoreColor(s)+'">'+
+      '<div class="score"><div class="ring" style="--p:'+s+'"><span>'+s+'</span></div><span class="fit">'+fitLabel(s)+'</span></div>'+
+      '<div class="body">'+
+        '<div class="meta">'+newPill+dlPill(t)+'<span class="pill cat">'+esc(CATS[t.category]||t.category)+'</span></div>'+
+        '<h3><a href="'+esc(safeUrl(t.url))+'" target="_blank" rel="noopener">'+esc(t.title)+'</a></h3>'+
+        '<div class="pub">'+esc(t.publisher)+'</div>'+
+        (t.summary?'<div class="summary">'+esc(t.summary)+'</div>':'')+
+        '<div class="cols">'+
+          '<div class="box why"><div class="h">למה זה מתאים</div>'+esc(t.whyFit||"—")+'</div>'+
+          '<div class="box risk"><div class="h">תנאי סף וסיכונים</div>'+esc(t.risks||"—")+'</div>'+
+          '<div class="box next"><div class="h">הצעד הבא</div>'+esc(t.nextStep||"—")+'</div>'+
+        '</div>'+
+        '<div class="foot"><div class="facts">'+facts.join('<span aria-hidden="true">·</span>')+'</div>'+
+          '<div class="marks" data-id="'+esc(t._id)+'">'+
+            mk("interest","מעניין",m)+mk("bid","מגיש",m)+mk("skip","לא רלוונטי",m)+
+          '</div></div>'+
+      '</div></article>';
+  }
+  function mk(k,l,m){return '<button class="mk m-'+k+'" data-mark="'+k+'" aria-pressed="'+(m===k)+'"'+(db?'':' disabled')+'>'+l+'</button>'}
+
+  function render(){
+    renderCats();
+    var v=visible();
+    $("list").innerHTML=v.length?v.map(card).join(""):'<div class="empty">'+(state.tenders.length?"אין מכרזים שתואמים את הסינון. נסו להסיר את \"פתוחים בלבד\" או לבחור תחום אחר.":"עדיין אין מכרזים במאגר. הם יופיעו כאן אחרי הסריקה הבאה.")+'</div>';
+    var open=state.tenders.filter(isOpen);
+    $("s-open").textContent=open.length;
+    $("s-high").textContent=open.filter(function(t){return (t.score||0)>=70}).length;
+    $("s-soon").textContent=open.filter(function(t){var d=daysLeft(t.deadline);return d!=null&&d<=7}).length;
+    var meta=state.meta||{};
+    $("s-new").textContent=meta.newCount!=null?meta.newCount:"—";
+    $("last-scan").textContent=meta.at?fmtDate(meta.at,true):"—";
+    $("next-scan").textContent=nextScan();
+    if(meta.briefing){$("brief").textContent=meta.briefing}
+    if(meta.at){$("brief-date").textContent="תדריך בוקר · "+fmtDate(meta.at)}
+    var picks=open.slice().sort(function(a,b){return (b.score||0)-(a.score||0)}).slice(0,5);
+    $("picks").innerHTML=picks.length?picks.map(function(t){return '<li><span class="sc">'+(t.score||0)+'</span><a href="'+esc(safeUrl(t.url))+'" target="_blank" rel="noopener">'+esc(t.title)+'</a></li>'}).join(""):'<li class="note">אין עדיין נתונים.</li>';
+    var src=meta.sources||[];
+    if(src.length){$("sources").innerHTML=src.map(function(s){
+      var cls=s.ok===true?"ok":s.ok===false?"err":"na";var txt=s.ok===true?("נסרק"+(s.found!=null?" · "+s.found+" רלוונטיים":"")):s.ok===false?"לא זמין היום":"מעקב ידני";
+      return '<li><span>'+(s.url?'<a href="'+esc(safeUrl(s.url))+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>':esc(s.name))+'</span><span class="st '+cls+'">'+txt+'</span></li>'}).join("")}
+  }
+  function nextScan(){
+    var now=new Date();var parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Jerusalem",hour:"numeric",hour12:false}).format(now);
+    return (parseInt(parts,10)<8?"היום":"מחר")+" ב-08:00";
+  }
+
+  document.addEventListener("click",function(e){
+    var c=e.target.closest(".chip");if(c){state.cat=c.dataset.cat;render();return}
+    var b=e.target.closest(".mk");if(b&&db){
+      var id=b.parentNode.dataset.id,k=b.dataset.mark,cur=(state.marks[id]||{}).mark;
+      var next=cur===k?null:k;state.marks[id]={mark:next};render();
+      store("marks",state.marks);
+    }
+  });
+  $("q").addEventListener("input",function(e){state.q=e.target.value;render()});
+  $("sort").addEventListener("change",function(e){state.sort=e.target.value;store("sort",state.sort);render()});
+  $("open-only").addEventListener("change",function(e){state.openOnly=e.target.checked;store("open",state.openOnly);render()});
+  $("hide-skip").addEventListener("change",function(e){state.hideSkip=e.target.checked;store("hideSkip",state.hideSkip);render()});
+
+  render();
+  function loadJSON(p){return fetch(p+"?t="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+  Promise.all([loadJSON("data/tenders.json"),loadJSON("data/meta.json")]).then(function(res){
+    state.tenders=res[0].map(function(o){o._id=o.id;return o});state.meta=res[1];
+    $("live-dot").classList.remove("off");$("live-txt").textContent="מתעדכן אוטומטית כל בוקר";render();
+  }).catch(function(){$("live-txt").textContent="טעינת הנתונים נכשלה. רעננו את העמוד.";$("list").innerHTML='<div class="empty">לא הצלחנו לטעון את רשימת המכרזים.</div>'});
+})();
+</script>
+
+</body>
+</html>
